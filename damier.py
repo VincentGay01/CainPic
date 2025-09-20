@@ -104,71 +104,6 @@ class FlouteurZone:
         
         return result
     
-    def apply_blur_circle(self, center_x, center_y, radius, blur_type='gaussian',
-                         blur_strength=5, fade_edges=True):
-        """Applique un flou sur une zone circulaire"""
-        # Créer un masque circulaire
-        y, x = np.ogrid[:self.height, :self.width]
-        distance = np.sqrt((x - center_x)**2 + (y - center_y)**2)
-        
-        if fade_edges:
-            # Masque avec fondu progressif
-            mask = np.clip((radius - distance) / (radius * 0.2), 0, 1)
-        else:
-            # Masque binaire
-            mask = (distance <= radius).astype(float)
-        
-        # Appliquer le flou sur toute l'image (plus efficace)
-        if blur_type == 'gaussian':
-            blurred_img = self.gaussian_blur(self.img_array, sigma=blur_strength)
-        elif blur_type == 'motion':
-            blurred_img = self.motion_blur(self.img_array, kernel_size=blur_strength*2+1)
-        elif blur_type == 'box':
-            blurred_img = self.box_blur(self.img_array, kernel_size=blur_strength*2+1)
-        else:
-            blurred_img = self.gaussian_blur(self.img_array, sigma=blur_strength)
-        
-        # Mélanger selon le masque
-        result = self.img_array.copy().astype(float)
-        for i in range(3):
-            result[:, :, i] = (
-                self.img_array[:, :, i] * (1 - mask) + 
-                blurred_img[:, :, i] * mask
-            )
-        
-        return result.astype(np.uint8)
-    
-    def apply_blur_polygon(self, points, blur_type='gaussian', blur_strength=5, fade_edges=True):
-        """Applique un flou sur une zone polygonale"""
-        # Créer un masque pour le polygone
-        mask = np.zeros((self.height, self.width), dtype=np.float32)
-        pts = np.array(points, np.int32)
-        cv2.fillPoly(mask, [pts], 1.0)
-        
-        if fade_edges:
-            # Ajouter un fondu aux bords du polygone
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
-            mask = cv2.morphologyEx(mask, cv2.MORPH_GRADIENT, kernel)
-            mask = cv2.GaussianBlur(mask, (21, 21), 0)
-            mask = mask / mask.max()  # Normaliser
-        
-        # Appliquer le flou
-        if blur_type == 'gaussian':
-            blurred_img = self.gaussian_blur(self.img_array, sigma=blur_strength)
-        elif blur_type == 'motion':
-            blurred_img = self.motion_blur(self.img_array, kernel_size=blur_strength*2+1)
-        else:
-            blurred_img = self.gaussian_blur(self.img_array, sigma=blur_strength)
-        
-        # Mélanger
-        result = self.img_array.copy().astype(float)
-        for i in range(3):
-            result[:, :, i] = (
-                self.img_array[:, :, i] * (1 - mask) + 
-                blurred_img[:, :, i] * mask
-            )
-        
-        return result.astype(np.uint8)
     
     def radial_blur(self, image_array, strength):
         """Flou radial (effet zoom/rotation)"""
@@ -311,7 +246,7 @@ def flou_interactif(image_path, blur_type='gaussian', blur_strength=5):
 if __name__ == "__main__":
     # Remplacez par le chemin de votre image
     IMAGE_PATH = "test5.jpg"
-    print("\n🌟 Exemple 4: Sélection interactive")
+    print("\n Exemple 4: Sélection interactive")
     print("Cliquez sur l'image pour sélectionner une zone à flouter...")
     flou_interactif(IMAGE_PATH, blur_type='motion', blur_strength=20)
         
