@@ -58,9 +58,9 @@ def halftone_gpu_optimized(image_path, cell=4, max_radius=None):
 
 
 # Version principale avec CuPy
-def create_halftone_gpu(image_path="test5.jpg", cell=4, output_path="halftone_gpu.png"):
+def create_halftone_gpu(image_path="test5.jpg", cell=4, output_path="halftone_gpu.png",radius=0.1):
 
-    X, Y, S = halftone_gpu_optimized(image_path, cell)
+    X, Y, S = halftone_gpu_optimized(image_path, cell,radius)
     
     # Affichage
     plt.figure(figsize=(8,8))
